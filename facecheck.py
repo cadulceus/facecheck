@@ -1,6 +1,7 @@
-import pip, cv2, time, os
-from PIL import Image
+import cv2, time, os
 import numpy as np
+
+#prereqs: opencv-python version 3.1, opencv-contrib-python version 3.2.0.7, numpy
 
 """Takes a greyscale image, returns a numpy array as the sub image of the argument containing a face"""
 def extract_face(gs, face_cascade):
