@@ -1,4 +1,4 @@
-import cv2, time, os
+import cv2, hashlib
 import numpy as np
 
 #prereqs: opencv-python version 3.1, opencv-contrib-python version 3.2.0.7, numpy
@@ -16,36 +16,60 @@ def detect(recognizer):
 		ret, frame = video_capture.read()
 		gs = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		found_face = extract_face(gs, face_cascade)
-		nbr_predicted, conf = recognizer.predict(found_face)
+		try:
+			nbr_predicted, conf = recognizer.predict(found_face)
+		except Exception:
+			print Exception
+			print "Probably couldn't find a face"
+			continue
 		print "Label: ", nbr_predicted
 		print "Confidence: ", conf
 
 
-def train(recognizer):
+def train(recognizer, images, labels):
+	recognizer.train(images, labels)
+
+def collect_faces(images, labels, inp_count, recognizer, desired_label):
 	video_capture = cv2.VideoCapture(0)
-	images = []
+	old_len = len(images)
 	face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-	for i in range(15):
+	for i in range(inp_count):
 		ret, frame = video_capture.read()
 		gs = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		found_face = extract_face(gs, face_cascade)
+		if not found_face.all():
+			continue;
 		images.append(found_face)
 		cv2.imshow("Added face", images[-1])
-		cv2.waitKey(15)
+		cv2.waitKey(inp_count)
 	#label is an identifier for an individual face
-	print "Input label: ",
-	label = int(raw_input())
-	recognizer.train(images, np.array([label for i in range(15)]))
-
-
+	print "Found " + str(len(images)) + " faces"
+	tmp = labels
+	if len(labels) == 0:
+		labels = np.array([desired_label for i in range(len(images)-old_len)])
+	else:
+		labels = np.append(tmp, np.array([desired_label for i in range(len(images)-old_len)]))
+	return images, labels
 
 def main():
 	recognizer = cv2.face.createLBPHFaceRecognizer()
+	labels = np.array([])
+	images = []
 	while 1:
-		print "1: Train\n2: Detect"
+		print len(images)
+		print len(labels)
+		print labels
+		print "1: collect_faces\n2: Train\n3: Detect"
 		cmd = raw_input()
 		if cmd == "1":
-			train(recognizer)
+			print "input desired frame count"
+			inp_count = int(raw_input())
+			print "input name of target: "
+			name = raw_input()
+			desired_label = int(hashlib.md5(name).hexdigest(), 16) % 2147483647 # replace with data recieved from plugin?
+			images, labels = collect_faces(images, labels, inp_count, recognizer, desired_label)
 		elif cmd == "2":
+			train(recognizer, images, labels)
+		elif cmd == "3":
 			detect(recognizer)
 main()
