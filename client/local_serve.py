@@ -177,16 +177,29 @@ def create():
     v.pin = request.args['pin'].strip()
     secret = gen_key()
     v.secret = secret
-
-    response = {'status': 'success',
-                'pin': v.pin,
-                'secret': v.secret}
-
-    print response
+    v.unlocked = True
 
     return j({'status': 'success',
               'pin': v.pin,
               'secret': v.secret})
+
+@app.route("/save", methods=["POST"])
+def save():
+    if not request.json or 'filepath' not in request.json:
+        return j({'status': 'error',
+                  'message': 'missing filepath argument'})
+
+    filename = request.json['filepath']
+    v.filename = filename
+
+    try:
+        v.save()
+    except:
+        return j({'status': 'error',
+                  'message': 'could not open vault file'})
+
+    return j({'status': 'success'})
+
 
 @app.route("/load", methods=["POST"])
 def load():
