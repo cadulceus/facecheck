@@ -21,9 +21,6 @@ function sendRequestPost(url,data,callback) {
   };
 }
 
-
-
-
 document.addEventListener('DOMContentLoaded', function() {
   var gen_pass = document.getElementById('gen_pass');
   gen_pass.addEventListener('click', function() {

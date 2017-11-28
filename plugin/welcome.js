@@ -10,6 +10,9 @@
         //    var video = document.getElementsByTagName('video')[0];
         //    video.src = window.URL.createObjectURL(mediaStream);
         //    video.play();
+        //  window.close()
+            mediaStream.getTracks()[0].stop();
+            return
         },   
         //handle error
         function (error) {

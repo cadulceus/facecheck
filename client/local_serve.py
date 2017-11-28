@@ -49,11 +49,6 @@ def detect():
     success = v.detect()
     return {'status': 'success' if success else 'error'}
 
-@app.route("/detect")
-def detect():
-    success = v.detect()
-    return {'status': 'success' if success else 'error'}
-
 @app.route("/edit_item", methods=["POST"])
 def edit_item():
     if not request.json or 'service' not in request.json or 'id' not in request.json:
