@@ -25,7 +25,7 @@ def sync():
         if not vault:
             return jsonify({'status': 'error'})
 
-        return jsonfiy({'status': 'success',
+        return jsonify({'status': 'success',
                         'content': vault.content})
 
 @app.route("/")
