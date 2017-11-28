@@ -56,19 +56,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var train = document.getElementById('train');
   train.addEventListener('click', function() {
-    document.getElementById("status_msg").innerHTML = "danny waz her";
+     sendRequest('http://localhost:5000/train', function (response) {
+     
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+      document.getElementById("status_msg").innerHTML = stat;
+
+    });
+
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("passbox").style.display = "none";
     document.getElementById("status_msg").style.backgroundColor = "#5fba7d";
   });
 
 
-  var link = document.getElementById('wipe_user');
-  link.addEventListener('click', function() {
-      document.getElementById("status_msg").innerHTML = "danny waz her";
+  var wipe_user = document.getElementById('wipe_user');
+  wipe_user.addEventListener('click', function() {
+     sendRequest('http://localhost:5000/clear_training', function (response) {
+     var json = JSON.parse(response);
+     var stat = json['status'];
+
+     if(stat == "error"){
+        document.getElementById("status_msg").innerHTML = json['message'];
+     }else{
+        document.getElementById("status_msg").innerHTML = stat;
+	//train it again :)
+    	sendRequest('http://localhost:5000/train', function (response) {
+     
+    	var json = JSON.parse(response);
+    	var stat = json['status'];
+
+    	document.getElementById("status_msg").innerHTML = stat;
+
+    	});
+     }
+
+    });
       document.getElementById("status_msg").style.display = "block";
       document.getElementById("passbox").style.display = "none";
       document.getElementById("status_msg").style.backgroundColor = "#5fba7d";
+
+    
+
   });
 
 
