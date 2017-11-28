@@ -1,3 +1,12 @@
+function sleep(milliseconds) {
+  var start = new Date().getTime();
+  for (var i = 0; i < 1e7; i++) {
+    if ((new Date().getTime() - start) > milliseconds){
+      break;
+    }
+  }
+}
+
 function sendRequest(url, callback) {
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function () {
@@ -26,9 +35,23 @@ document.addEventListener('DOMContentLoaded', function() {
   gen_pass.addEventListener('click', function() {
     sendRequest('http://localhost:5000/gen_pass', function (response) {
       //alert('My request returned this: ' + response);
-    	var json = JSON.parse(response);
-    	var password = json['password'];
+      var json = JSON.parse(response);
+      var password = json['password'];
       document.getElementById("status_msg").innerHTML = "Your Password:"+password;
+
+      sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
+      //alert('My request returned this: ' + response);
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+      if(stat == "error"){
+        document.getElementById("status_msg").innerHTML = stat;
+      }else{
+        document.getElementById("status_msg").innerHTML = "Your password is copied to the clipboard :)";
+      }
+
+      });
+    
     });
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("passbox").style.display = "none";
