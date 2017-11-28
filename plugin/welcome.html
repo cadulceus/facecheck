@@ -1,15 +1,91 @@
 <!doctype html>
-
 <html>
+  <head>
+    <script src="welcome.js"></script>
+  </head>
     <!--
       - JavaScript and HTML must be in separate files: see our Content Security
       - Policy documentation[1] for details and explanation.
       -
       - [1]: https://developer.chrome.com/extensions/contentSecurityPolicy
     -->
-    <script src="welcome.js"></script>
-  </head>
+    <style>
+        html, body {
+          height: 100%;
+        }
+        .parent {
+          width: 100%;
+          height: 100%;
+          display: table;
+          text-align: center;
+        }
+        .parent > .child {
+          display: table-cell;
+          vertical-align: middle;
+        }
+        h1 {
+          font-weight: bold;
+          color: white;
+          font-size: 48px;
+        }
+        h2 {
+          color: white;
+          font-size: 16px;
+        }
+        .warning {
+          color: red;
+        }
+        .button {
+        background-color: #C5E1A5; 
+        color: black; 
+        border: 2px solid #9CCC65;
+        padding: 4px 4px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin: 4px 2px;
+        -webkit-transition-duration: 0.4s; /* Safari */
+        transition-duration: 0.4s;
+        cursor: pointer;
+        }
+        .button1 {
+            background-color: #C5E1A5; 
+            color: black; 
+            border: 2px solid #9CCC65;
+        }
 
-  <body>
+        .button1:hover {
+            background-color: #AED581;
+            color: white;
+        }
+        .button2 {
+            background-color: #FFEB3B; 
+            color: black; 
+            border: 2px solid #FBC02D;
+        }
+
+        .button2:hover {
+            background-color: #FDD835;
+            color: white;
+        }
+
+        .ios {
+            padding: 10px;
+            border: 1px solid #ddd;
+            width: 50px;
+            height: 50px;
+            text-align: center;
+            font-size: 30px;
+        }
+
+    </style>
+
+  <body bgcolor="#1E88E5">
+    <section class="parent">
+      <div class="child" id="container">
+        <h1>Please allow webcam access!</h1>
+      </div>
+    </section>
   </body>
 </html>
