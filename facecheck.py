@@ -55,10 +55,10 @@ def collect_faces(images, labels, inp_count, recognizer, desired_label):
 	return images, labels
 
 def main():
-        try:
-	    recognizer = cv2.face.createLBPHFaceRecognizer()
-        except:
-            recognizer = cv2.face.LBPHFaceRecognizer_create()
+	try:
+		recognizer = cv2.face.createLBPHFaceRecognizer()
+	except:
+	    recognizer = cv2.face.LBPHFaceRecognizer_create()
 	labels = np.array([])
 	images = []
 	while 1:
