@@ -1,3 +1,12 @@
+function tabQuery(callback){
+	var url;
+        chrome.tabs.query({"active": true,"currentWindow":true}, function (tabs){
+        url = tabs[0].url;
+	return callback(url);
+        }
+	);
+}
+
 function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
@@ -60,10 +69,12 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("status_msg").innerHTML = stat;
 	return;
       }
-      }); 
+      });
+      tabQuery(function(url){
+	      query = url;
+      console.log(query);
 
-
-      var data = {"username":"steve","service":window.location.hostname,"password":password,"entry_name":"asdfasdf"}
+      var data = {"username":"steve","service":query,"password":password,"entry_name":"asdfasdf"}
       sendRequestPost('http://localhost:5000/add_item',data,function (response) {
 
       var json = JSON.parse(response);
@@ -71,8 +82,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         document.getElementById("status_msg").innerHTML = stat;
       }); 
-
-      sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
+	
+      sendRequest('http://localhost:5000/copy_pass?service='+query, function (response) {
       //alert('My request returned this: ' + response);
 
       var json = JSON.parse(response);
@@ -86,6 +97,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("passbox").style.display = "none";
     document.getElementById("status_msg").style.backgroundColor = "#64DD17";
+    });
+
   });
 
 
