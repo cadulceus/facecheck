@@ -22,11 +22,13 @@ def gen_pass(l=16, c=VALID_CHARS):
 
 @app.route("/gen_pass")
 def generate_password():
+    global v
     return j({'status': 'success',
               'password': gen_pass()})
 
 @app.route("/copy_pass")
 def copy_password():
+    global v
     if not request.args or 'service' not in request.args or not v.unlocked:
         return j({'status': 'error'})
 
@@ -40,17 +42,23 @@ def copy_password():
 
 @app.route("/train")
 def train():
+    global v
     v.collect_faces()
     v.train()
+    print v.unlocked
+    print v.pin
+    print v.secret
     return j({'status': 'success'})
 
 @app.route("/detect")
 def detect():
+    global v
     success = v.detect()
     return {'status': 'success' if success else 'error'}
 
 @app.route("/edit_item", methods=["POST"])
 def edit_item():
+    global v
     if not request.json or 'service' not in request.json or 'id' not in request.json:
         return j({'status': 'error',
                   'message': 'entry id or service not provided'})
@@ -73,6 +81,7 @@ def edit_item():
 
 @app.route("/add_item", methods=["POST"])
 def add_item():
+    global v
     if not request.json or 'username' not in request.json or 'service' not in request.json:
         return j({'status': 'error',
                   'message': 'username or service not provided'})
@@ -97,22 +106,26 @@ def add_item():
 
 @app.route("/items")
 def items():
+    global v
     i = v.items
     i['status'] = 'success'
     return jsonify(i)
 
 @app.route("/unlock")
 def unlock():
+    global v
     success = v.unlock()
     return j({'status': 'success' if success else 'error'})
 
 @app.route("/lock")
 def lock():
+    global v
     v.lock()
     return j({'status': 'success'})
 
 @app.route("/post_sync")
 def post_sync():
+    global v
     if not v.secret:
         return j({'status': 'error',
                   'message': 'vault must have been unlocked to upload the most recent sync'})
@@ -129,6 +142,7 @@ def post_sync():
 
 @app.route("/get_sync")
 def get_sync():
+    global v
     if not v.secret:
         return j({'status': 'error',
                   'message': 'vault must have been unlocked to get the most recent sync'})
@@ -169,6 +183,7 @@ def get_sync():
 
 @app.route("/set_pin")
 def set_pin():
+    global v
     if not request.args or 'pin' not in request.args:
         return j({'status': 'error',
                   'message': 'missing pin argument'})
@@ -181,6 +196,7 @@ def set_pin():
 
 @app.route("/create")
 def create():
+    global v
     if not request.args or 'pin' not in request.args:
         return j({'status': 'error',
                   'message': 'missing pin argument'})
@@ -196,6 +212,7 @@ def create():
 
 @app.route('/clear_training')
 def clear_training():
+    global v
     if not v.unlocked:
         return j({'status': 'error',
                   'message': 'vault must be unlocked to clear facial data'})
@@ -217,6 +234,7 @@ def clear_training():
 
 @app.route("/save", methods=["POST"])
 def save():
+    global v
     if not request.json or 'filepath' not in request.json:
         return j({'status': 'error',
                   'message': 'missing filepath argument'})
@@ -235,6 +253,7 @@ def save():
 
 @app.route("/load", methods=["POST"])
 def load():
+    global v
     if not request.json or 'filepath' not in request.json:
         return j({'status': 'error',
                   'message': 'missing filepath argument'})

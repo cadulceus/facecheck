@@ -114,7 +114,15 @@ function confirm_pin(input) {
 
 function import_vault() {
     var container = document.getElementById('container');
-    container.innerHTML = '<h1>Inside the import_vault event handler</h1>'
+    container.innerHTML = '<h1>Input the vault passphrase</h1>';
+    container.innerHTML += '<br><input type="text" id="secret_input" />';
+    document.getElementById("secret_input").addEventListener("keyup", function(event) {
+        event.preventDefault();
+        if (event.keyCode === 13) {
+            input = document.getElementById("secret_input").value;
+            console.log(input);
+        }
+    })
 }
 
 (function () {
