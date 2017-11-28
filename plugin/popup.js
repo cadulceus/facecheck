@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
   gen_pass.addEventListener('click', function() {
     sendRequest('http://localhost:5000/gen_pass', function (response) {
       //alert('My request returned this: ' + response);
+      //
       var json = JSON.parse(response);
       var password = json['password'];
       document.getElementById("status_msg").innerHTML = "Your Password:"+password;
@@ -55,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("passbox").style.display = "none";
-    document.getElementById("status_msg").style.backgroundColor = "#5fba7d";
+    document.getElementById("status_msg").style.backgroundColor = "#64DD17";
   });
 
 
@@ -68,12 +69,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     	if(stat == "error"){
         document.getElementById("status_msg").innerHTML = stat;
+        document.getElementById("status_msg").style.backgroundColor = "#F44336";
     	}else{
-        document.getElementById("status_msg").innerHTML = "Your password is copied to the clipboard :)";
+        document.getElementById("status_msg").innerHTML = "Password copied to clipboard";
     	}
     });
     document.getElementById("status_msg").style.display = "block";
-    document.getElementById("status_msg").style.backgroundColor = "#5fba7d";
+    document.getElementById("status_msg").style.backgroundColor = "#64DD17";
   });
 
 
@@ -90,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("passbox").style.display = "none";
-    document.getElementById("status_msg").style.backgroundColor = "#5fba7d";
+    document.getElementById("status_msg").style.backgroundColor = "#64DD17";
   });
 
 
@@ -102,6 +104,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
      if(stat == "error"){
         document.getElementById("status_msg").innerHTML = json['message'];
+        document.getElementById("status_msg").style.backgroundColor = "#F44336";
      }else{
         document.getElementById("status_msg").innerHTML = stat;
 	//train it again :)
@@ -118,7 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
       document.getElementById("status_msg").style.display = "block";
       document.getElementById("passbox").style.display = "none";
-      document.getElementById("status_msg").style.backgroundColor = "#5fba7d";
+      document.getElementById("status_msg").style.backgroundColor = "#64DD17";
 
     
 
@@ -136,17 +139,19 @@ document.addEventListener('DOMContentLoaded', function() {
     	sendRequestPost('http://localhost:5000/edit_item',json_data,function (response) {
       	var json = JSON.parse(response);
       	if (json['status'] == 'error' && json['message'] == null) {
-              	document.getElementById("status_msg").innerHTML ='Something went wrong :(';        
+              	document.getElementById("status_msg").innerHTML ='Something went wrong :(';
+                document.getElementById("status_msg").style.backgroundColor = "#F44336";
       	}else{
-              	document.getElementById("status_msg").innerHTML = json['message'];        
+              	document.getElementById("status_msg").innerHTML = json['message'];
+                document.getElementById("status_msg").style.backgroundColor = "#64DD17"   
       	}
 	    });
     });
 
-    document.getElementById("status_msg").innerHTML = "Change your password :)";
+    document.getElementById("status_msg").innerHTML = "Modify and confirm:";
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("passbox").style.display = "block";
-    document.getElementById("status_msg").style.backgroundColor = "#5fba7d";
+    document.getElementById("status_msg").style.backgroundColor = "#FFEB3B";
   });
 });
 
