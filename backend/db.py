@@ -1,4 +1,5 @@
 from peewee import *
+import datetime
 
 db = SqliteDatabase('facecheck.db')
 
@@ -9,10 +10,11 @@ class BaseModel(Model):
 class Vault(BaseModel):
     vault_id = FixedCharField(128)
     content = CharField()
+    uploaded = DateTimeField(default=datetime.datetime.utcnow)
 
 def get_vault(vault_id):
     try:
-        result = Vault.get(Vault.vault_id == vault_id)
+        result = (Vault.select().where(Vault.vault_id == vault_id).order_by(Vault.uploaded.desc()).get())
     except:
         return False
 
@@ -23,6 +25,8 @@ def update_vault(vault_id, content):
     return Vault.create(vault_id=vault_id, content=content)
 
 db.connect()
-db.create_tables([Vault])
-
+try:
+    db.create_tables([Vault])
+except:
+    pass
 
