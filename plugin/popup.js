@@ -33,6 +33,18 @@ function sendRequestPost(url,data,callback) {
 document.addEventListener('DOMContentLoaded', function() {
   var gen_pass = document.getElementById('gen_pass');
   gen_pass.addEventListener('click', function() {
+
+      sendRequest('http://localhost:5000/detect', function (response) {
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+      if(stat == "error"){
+        document.getElementById("status_msg").innerHTML = stat;
+	return;
+      }
+      }); 
+
+
     sendRequest('http://localhost:5000/gen_pass', function (response) {
       //alert('My request returned this: ' + response);
       //
@@ -42,6 +54,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
       sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
       //alert('My request returned this: ' + response);
+
+      sendRequest('http://localhost:5000/detect', function (response) {
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+      if(stat == "error"){
+        document.getElementById("status_msg").innerHTML = stat;
+	return;
+      }
+      });
+
       var json = JSON.parse(response);
       var stat = json['status'];
 
@@ -64,6 +87,17 @@ document.addEventListener('DOMContentLoaded', function() {
   copy_pass.addEventListener('click', function() {
   	sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
       //alert('My request returned this: ' + response);
+      
+      sendRequest('http://localhost:5000/detect', function (response) {
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+      if(stat == "error"){
+        document.getElementById("status_msg").innerHTML = stat;
+	return;
+      }
+      });
+
       var json = JSON.parse(response);
       var stat = json['status'];
 
@@ -83,6 +117,16 @@ document.addEventListener('DOMContentLoaded', function() {
   train.addEventListener('click', function() {
      sendRequest('http://localhost:5000/train', function (response) {
      
+      sendRequest('http://localhost:5000/detect', function (response) {
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+      if(stat == "error"){
+        document.getElementById("status_msg").innerHTML = stat;
+	return;
+      }
+      });
+
       var json = JSON.parse(response);
       var stat = json['status'];
 
@@ -99,6 +143,18 @@ document.addEventListener('DOMContentLoaded', function() {
   var wipe_user = document.getElementById('wipe_user');
   wipe_user.addEventListener('click', function() {
      sendRequest('http://localhost:5000/clear_training', function (response) {
+      
+      sendRequest('http://localhost:5000/detect', function (response) {
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+      if(stat == "error"){
+        document.getElementById("status_msg").innerHTML = stat;
+	return;
+      }
+      });
+
+
      var json = JSON.parse(response);
      var stat = json['status'];
 
@@ -131,6 +187,15 @@ document.addEventListener('DOMContentLoaded', function() {
   var edit = document.getElementById('modify_password');
   var input = document.getElementById('confirm_modify_password');
   edit.addEventListener('click', function() {
+      sendRequest('http://localhost:5000/detect', function (response) {
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+      if(stat == "error"){
+        document.getElementById("status_msg").innerHTML = stat;
+	return;
+      }
+      });
     input.addEventListener('click', function() {
 	    var password = document.getElementById("password").value;
       var service = window.location.hostname;
