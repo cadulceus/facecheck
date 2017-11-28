@@ -183,6 +183,25 @@ def create():
               'pin': v.pin,
               'secret': v.secret})
 
+@app.route('/clear_training')
+def clear_training():
+    if not v.unlocked:
+        return j({'status': 'error',
+                  'message': 'vault must be unlocked to clear facial data'})
+
+    v.training = {}
+    v.encrypted_training = ""
+
+    if v.filename:
+        try:
+            v.save()
+        except:
+            return j({'status': 'error',
+                      'message': 'could not open vault file'})
+
+    return j({'status': 'success'})
+
+
 @app.route("/save", methods=["POST"])
 def save():
     if not request.json or 'filepath' not in request.json:
