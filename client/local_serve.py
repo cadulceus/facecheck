@@ -13,6 +13,11 @@ j = jsonify
 def gen_pass(l=16, c=VALID_CHARS):
     return ''.join([random.choice(c) for i in xrange(l)])
 
+@app.route("/gen_pass")
+def generate_password():
+    return j({'status': 'success',
+              'password': gen_pass()})
+
 @app.route("/edit_item", methods=["POST"])
 def edit_item():
     if not request.json or 'service' not in request.json or 'id' not in request.json:
@@ -142,6 +147,11 @@ def set_pin():
     print v.pin
     print v.filename
     return j({'status': 'success'})
+
+@app.route("/create")
+def create():
+    #v = Vault()
+    return "Create"
 
 @app.route("/load", methods=["POST"])
 def load():
