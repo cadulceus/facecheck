@@ -180,16 +180,12 @@ class Vault(object):
         self.items[service].append(new_item) 
         return new_item
 
-    def edit_item(self, service, _id, password):
+    def edit_item(self, service, password):
         if not self.unlocked or service not in self.items:
             return False
         
         modified = False
-        for i in xrange(len(self.items[service])):
-            if _id == self.items[service][i]['id']:
-                self.items[service][i]['password'] = password
-                modified = self.items[service][i]
-                break
+        self.items[service][0]['password'] = password
 
         return modified
     

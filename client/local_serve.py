@@ -69,7 +69,6 @@ def edit_item():
         password = gen_pass()
 
     success = v.edit_item(request.json['service'].lower(),
-                          request.json['id'].lower(),
                           password)
 
     if not success:
@@ -179,6 +178,10 @@ def get_sync():
             w.write(data['content'].decode('base64'))
 
     return j({'status': 'success'})
+    
+@app.route("/import", methods=["POST"])
+def import():
+    if not 
     
 
 @app.route("/set_pin")
