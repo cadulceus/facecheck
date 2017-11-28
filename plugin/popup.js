@@ -12,10 +12,11 @@ function sendRequest(url, callback) {
 document.addEventListener('DOMContentLoaded', function() {
     var link = document.getElementById('gen_pass');
     link.addEventListener('click', function() {
-        sendRequest('http://localhost:8000', function (response) {
-        alert('My request returned this: ' + response);
+        sendRequest('http://localhost:5000', function (response) {
+        //alert('My request returned this: ' + response);
+        document.getElementById("status_msg").innerHTML = response;
+
         });
-        document.getElementById("status_msg").innerHTML = "test123";
         document.getElementById("status_msg").style.display = "block";
         document.getElementById("status_msg").style.backgroundColor = "#5fba7d";
     });
