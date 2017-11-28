@@ -1,6 +1,7 @@
-import hashlib, random, requests, string
+import hashlib, pyperclip, random, requests, string
 from manager import Vault
 from flask import Flask, request, jsonify
+from Tkinter import Tk
 
 app = Flask(__name__)
 BACKEND_ADDR = "localhost:5005"
@@ -10,6 +11,12 @@ VALID_CHARS = ''.join(set(string.printable) - set(string.whitespace))
 v = Vault()
 j = jsonify
 
+def gen_key(l=10, f="words.txt"):
+    with open(f, 'r') as r:
+        words = [w.strip() for w in r.readlines()]
+
+    return ' '.join([random.choice(words).lower() for i in xrange(l)])
+
 def gen_pass(l=16, c=VALID_CHARS):
     return ''.join([random.choice(c) for i in xrange(l)])
 
@@ -17,6 +24,19 @@ def gen_pass(l=16, c=VALID_CHARS):
 def generate_password():
     return j({'status': 'success',
               'password': gen_pass()})
+
+@app.route("/copy_pass")
+def copy_password():
+    if not request.args or 'service' not in request.args or not v.unlocked:
+        return j({'status': 'error'})
+
+    service = request.args['service'].lower()
+
+    if service not in v.items:
+        return j({'status': 'error'})
+    password = v.items[service][0]['password']
+    pyperclip.copy(password)
+    return j({'status': 'success'})
 
 @app.route("/edit_item", methods=["POST"])
 def edit_item():
@@ -150,7 +170,12 @@ def set_pin():
 
 @app.route("/create")
 def create():
-    #v = Vault()
+    if not request.args or 'pin' not in request.args:
+        return j({'status': 'error',
+                  'message': 'missing pin argument'})
+    v = Vault()
+    v.pin = request.args['pin'].strip()
+
     return "Create"
 
 @app.route("/load", methods=["POST"])

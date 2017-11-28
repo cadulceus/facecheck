@@ -45,6 +45,9 @@ print resp.json()
 resp = requests.get(ENDPOINT + '/items')
 print resp.json()
 
+resp = requests.get(ENDPOINT + '/copy_pass?service=google.com')
+print resp.json()
+
 resp = requests.get(ENDPOINT + '/lock')
 print resp.json()
 
