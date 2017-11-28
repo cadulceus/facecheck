@@ -11,6 +11,10 @@
   },
   "permissions": [
     "activeTab",
-    "storage"
+    "storage",
+    "http://www.google.com/*",
+    "https://www.google.com/*",
+    "http://localhost/*"
+
   ]
 }
