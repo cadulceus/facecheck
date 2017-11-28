@@ -1,6 +1,7 @@
 *.pyc
 *.json
 *.swp
+*.db
 env/
 venv/
 *.fcvault

@@ -2,19 +2,51 @@ import requests
 
 ENDPOINT = 'http://localhost:5000'
 resp = requests.post(ENDPOINT + '/load', json={'filepath': 'test.fcvault'})
-print resp.content
+print resp.json()
 
 resp = requests.get(ENDPOINT + '/set_pin?pin=1234')
-print resp.content
+print resp.json()
 
 resp = requests.get(ENDPOINT + '/unlock')
-print resp.content
+print resp.json()
+
+resp = requests.get(ENDPOINT + '/items')
+print resp.json()
+
+resp = requests.post(ENDPOINT + '/add_item', json={'service': 'google.com',
+                                                   'entry_name': 'Personal Email',
+                                                   'username': 'test@gmail.com'})
+print resp.json()
+x = resp.json()
+
+resp = requests.get(ENDPOINT + '/items')
+print resp.json()
 
 resp = requests.get(ENDPOINT + '/post_sync')
-print resp.content
+print resp.json()
 
 resp = requests.get(ENDPOINT + '/get_sync')
-print resp.content
+print resp.json()
+
+resp = requests.get(ENDPOINT + '/items')
+print resp.json()
+
+resp = requests.post(ENDPOINT + '/edit_item', json={'service': 'google.com',
+                                                   'id': x['added']['id'],
+                                                   'password': 'modified_password'})
+print resp.json()
+
+resp = requests.get(ENDPOINT + '/post_sync')
+print resp.json()
+
+resp = requests.get(ENDPOINT + '/get_sync')
+print resp.json()
+
+resp = requests.get(ENDPOINT + '/items')
+print resp.json()
 
 resp = requests.get(ENDPOINT + '/lock')
-print resp.content
+print resp.json()
+
+resp = requests.get(ENDPOINT + '/items')
+print resp.json()

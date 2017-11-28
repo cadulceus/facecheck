@@ -1,5 +1,5 @@
 from Crypto.Cipher import AES
-import cv2, json
+import cv2, datetime, hashlib, json
 
 class Vault(object):
     SECRET_HEADER = "===========BEGIN SECRET==========="
@@ -13,6 +13,7 @@ class Vault(object):
     def __init__(self):
         self.filename = ""
         self.pin = ""
+        self.unlocked = False
         self.first = True
         self.secret = ""
         self.encrypted_secret = ""
@@ -83,12 +84,15 @@ class Vault(object):
         self.encrypted_data = data[data_start + 1:data_end - 1]
         self.encrypted_training = data[training_start + 1:training_end - 1]
 
+        #print self.encrypted_secret
+        #print self.encrypted_data 
+        #print self.encrypted_training
         return True
 
     def load(self):
         with open(self.filename, 'r') as r:
             data = r.read()
-
+        
         return self._deserialize(data)
 
 
@@ -97,17 +101,19 @@ class Vault(object):
 
     def lock(self):
         self.secret = ""
-        self.items = []
+        self.items = {}
+        self.unlocked = False
 
     def unlock(self):
         pin = self._pad(self.pin)
 
-        if self.first:
+        if self.first or not self.secret:
             obj = AES.new(pin, AES.MODE_CBC, Vault.IV)
             self.secret = obj.decrypt(self.encrypted_secret)
             if not self.secret.startswith(Vault.CHECKSUM):
                 return False
             self.secret = self.secret[len(Vault.CHECKSUM):].rstrip('\x00')
+
 
         key = self._pad(self._make_key())
 
@@ -129,8 +135,39 @@ class Vault(object):
         self.items = json.loads(tmp_items)
 
         self.first = False
+        self.unlocked = True
 
         return True
+
+    def add_item(self, service, entry_name, username, password):
+        if not self.unlocked:
+            return False
+
+        if service not in self.items:
+            self.items[service] = []
+        
+        h = hashlib.sha512()
+        h.update(service + entry_name + str(datetime.datetime.utcnow()))
+        new_item = {'username': username,
+                    'password': password,
+                    'name': entry_name,
+                    'id': h.hexdigest()}
+
+        self.items[service].append(new_item) 
+        return new_item
+
+    def edit_item(self, service, _id, password):
+        if not self.unlocked or service not in self.items:
+            return False
+        
+        modified = False
+        for i in xrange(len(self.items[service])):
+            if _id == self.items[service][i]['id']:
+                self.items[service][i]['password'] = password
+                modified = self.items[service][i]
+                break
+
+        return modified
     
     def save(self):
         with open(self.filename, 'w') as w:

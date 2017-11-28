@@ -1,13 +1,69 @@
-import hashlib, requests
+import hashlib, random, requests, string
 from manager import Vault
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
 BACKEND_ADDR = "localhost:5005"
 BACKEND = "http://{}".format(BACKEND_ADDR)
+VALID_CHARS = ''.join(set(string.printable) - set(string.whitespace))
 
 v = Vault()
 j = jsonify
+
+def gen_pass(l=16, c=VALID_CHARS):
+    return ''.join([random.choice(c) for i in xrange(l)])
+
+@app.route("/edit_item", methods=["POST"])
+def edit_item():
+    if not request.json or 'service' not in request.json or 'id' not in request.json:
+        return j({'status': 'error',
+                  'message': 'entry id or service not provided'})
+
+    if 'password' in request.json:
+        password = request.json['password']
+    else:
+        password = gen_pass()
+
+    success = v.edit_item(request.json['service'].lower(),
+                          request.json['id'].lower(),
+                          password)
+
+    if not success:
+        return j({'status': 'error'})
+
+    return j({'status': 'success',
+              'modified': success})
+    
+
+@app.route("/add_item", methods=["POST"])
+def add_item():
+    if not request.json or 'username' not in request.json or 'service' not in request.json:
+        return j({'status': 'error',
+                  'message': 'username or service not provided'})
+
+    if 'password' in request.json:
+        password = request.json['password']
+    else:
+        password = gen_pass()
+
+    if 'entry_name' in request.json:
+        entry_name = request.json['entry_name']
+    else:
+        entry_name = request.json['service']
+
+    success = v.add_item(request.json['service'].lower(), entry_name, request.json['username'], password)
+    if not success:
+        return j({'status': 'error'})
+
+    return j({'status': 'success',
+              'added': success})
+    
+
+@app.route("/items")
+def items():
+    i = v.items
+    i['status'] = 'success'
+    return jsonify(i)
 
 @app.route("/unlock")
 def unlock():
@@ -70,7 +126,7 @@ def get_sync():
 
     if v.filename:
         with open(v.filename, 'w') as w:
-            w.write(data['content'])
+            w.write(data['content'].decode('base64'))
 
     return j({'status': 'success'})
     
@@ -82,6 +138,9 @@ def set_pin():
                   'message': 'missing pin argument'})
 
     v.pin = request.args['pin'].strip()
+
+    print v.pin
+    print v.filename
     return j({'status': 'success'})
 
 @app.route("/load", methods=["POST"])
