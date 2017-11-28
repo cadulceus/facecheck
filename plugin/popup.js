@@ -115,20 +115,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var train = document.getElementById('train');
   train.addEventListener('click', function() {
-     sendRequest('http://localhost:5000/train', function (response) {
-     
+      
       sendRequest('http://localhost:5000/detect', function (response) {
       var json = JSON.parse(response);
       var stat = json['status'];
 
-      if(stat == "error"){
+      if(stat == 'error'){
         document.getElementById("status_msg").innerHTML = stat;
 	return;
       }
       });
 
-      var json = JSON.parse(response);
-      var stat = json['status'];
+     sendRequest('http://localhost:5000/train', function (response) {
+    
+     var json = JSON.parse(response);
+     var stat = json['status'];
 
       document.getElementById("status_msg").innerHTML = stat;
 
@@ -191,7 +192,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var json = JSON.parse(response);
       var stat = json['status'];
 
-      if(stat == "error"){
+      if(stat == 'error'){
         document.getElementById("status_msg").innerHTML = stat;
 	return;
       }
