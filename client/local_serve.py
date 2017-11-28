@@ -175,8 +175,18 @@ def create():
                   'message': 'missing pin argument'})
     v = Vault()
     v.pin = request.args['pin'].strip()
+    secret = gen_key()
+    v.secret = secret
 
-    return "Create"
+    response = {'status': 'success',
+                'pin': v.pin,
+                'secret': v.secret}
+
+    print response
+
+    return j({'status': 'success',
+              'pin': v.pin,
+              'secret': v.secret})
 
 @app.route("/load", methods=["POST"])
 def load():
