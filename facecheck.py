@@ -5,8 +5,10 @@ import numpy as np
 
 """Takes a greyscale image, returns a numpy array as the sub image of the argument containing a face"""
 def extract_face(gs, face_cascade):
-	faces = face_cascade.detectMultiScale(gs)
+	faces = face_cascade.detectMultiScale(gs, minSize=(75,75))
 	for (x, y, w, h) in faces:
+                cv2.rectangle(gs, (x,y),(x+w,y+h), (255, 0, 0), 2)
+		cv2.imshow("Added face", gs)
 		return gs[y: y + h, x: x + w]
 
 def detect(recognizer):
@@ -35,24 +37,28 @@ def collect_faces(images, labels, inp_count, recognizer, desired_label):
 	face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 	for i in range(inp_count):
 		ret, frame = video_capture.read()
+		#cv2.imshow("Added face", frame)
 		gs = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 		found_face = extract_face(gs, face_cascade)
 		if not found_face.all():
 			continue;
 		images.append(found_face)
-		cv2.imshow("Added face", images[-1])
+		#cv2.imshow("Added face", images[-1])
 		cv2.waitKey(inp_count)
 	#label is an identifier for an individual face
 	print "Found " + str(len(images)) + " faces"
 	tmp = labels
 	if len(labels) == 0:
-		labels = np.array([desired_label for i in range(len(images)-old_len)])
+		labels = np.asarray([desired_label for i in range(len(images)-old_len)], dtype="int")
 	else:
-		labels = np.append(tmp, np.array([desired_label for i in range(len(images)-old_len)]))
+		labels = np.asarray(tmp, np.array([desired_label for i in range(len(images)-old_len)]), dtype="int")
 	return images, labels
 
 def main():
-	recognizer = cv2.face.createLBPHFaceRecognizer()
+        try:
+	    recognizer = cv2.face.createLBPHFaceRecognizer()
+        except:
+            recognizer = cv2.face.LBPHFaceRecognizer_create()
 	labels = np.array([])
 	images = []
 	while 1:
@@ -66,7 +72,7 @@ def main():
 			inp_count = int(raw_input())
 			print "input name of target: "
 			name = raw_input()
-			desired_label = int(hashlib.md5(name).hexdigest(), 16) % 2147483647 # replace with data recieved from plugin?
+			desired_label = int(hashlib.md5(name).hexdigest(), 16) % (2 ** 31) # replace with data recieved from plugin?
 			images, labels = collect_faces(images, labels, inp_count, recognizer, desired_label)
 		elif cmd == "2":
 			train(recognizer, images, labels)
