@@ -53,3 +53,6 @@ print resp.json()
 
 resp = requests.get(ENDPOINT + '/items')
 print resp.json()
+
+resp = requests.get(ENDPOINT + '/create?pin=1234')
+print resp.json()
