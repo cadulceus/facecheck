@@ -69,6 +69,20 @@
         color: white;
     }
 
+    .button6 {
+    }
+
+    .button6:hover {
+        background-color: #DDDDDD;
+        color: white;
+    }
+
+    .notification {
+    font-size: 14px;
+    -webkit-transition-duration: 0.4s;
+    transition-duration: 0.4s;
+    }
+
     body {
       margin: 10px;
       white-space: nowrap;
@@ -96,12 +110,21 @@
 
   <body>
     <div id="container">
-      <button id="test" class="button button1" ><img src="new.png" /></button>
-      <button class="button button2"><img src="copy.png" /></button>
-      <button class="button button3"><img src="train.png" /></button>
-      <button class="button button4"><img src="new_user.png" /></button>
-      <button class="button button5"><img src="settings.png" /></button>
+      <button id="gen_pass" class="button button1" ><img src="new.png" /></button>
+      <button id="copy_pass" class="button button2"><img src="copy.png" /></button>
+      <button id="train" class="button button3"><img src="train.png" /></button>
+      <button id="wipe_user" class="button button4"><img src="new_user.png" /></button>
+      <button id="modify_password" class="button button5"><img src="settings.png" /></button>
       </select>
+    </div>
+    <div class = "notification" id="status_msg" style="display: none;">
+      <br>
+    </div>
+    </div>
+    <div class = "passbox" id="passbox" style="display: none;">
+      <input type="text" name="password" size=29>
+      <br>
+      <button id="confirm_modify_password" class="button button6">confirm</button>
     </div>
   </body>
 </html>
