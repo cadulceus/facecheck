@@ -30,12 +30,12 @@ def generate_password():
 def copy_password():
     global v
     if not request.args or 'service' not in request.args or not v.unlocked:
-        return j({'status': 'error'})
+        return j({'status': 'bad args'+str(v.unlocked)})
 
     service = request.args['service'].lower()
 
     if service not in v.items:
-        return j({'status': 'error'})
+        return j({'status': 'service not in vault'})
     password = v.items[service][0]['password']
     pyperclip.copy(password)
     return j({'status': 'success'})
