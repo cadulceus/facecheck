@@ -55,6 +55,17 @@ function new_vault(first_try=true) {
 
 }
 
+function train_handler() {
+     sendRequest('http://localhost:5000/train', function (response) {
+        
+         var json = JSON.parse(response);
+         var stat = json['status'];
+
+         document.getElementById("container").innerHTML = '<h1>Successfully trained the vault</h1>';
+
+    });
+}
+
 function send_pin(pin) { 
     sendRequest('http://localhost:5000/create?pin='+pin, function (response) {
         //alert('My request returned this: ' + response);
@@ -65,8 +76,11 @@ function send_pin(pin) {
             document.getElementById("container").innerHTML = '<h2 class="warning">Error setting up new vault</h2>';
         }
         else {
-            document.getElementById("container").innerHTML = '<h2>Vault Created! Keep the following passphrase safe to import later: </h2><br>\
-                                                              <h2>' + json['secret'] + '</h2>';
+            document.getElementById("container").innerHTML = '<h1>Vault Created! Keep the following passphrase safe to import later: </h1><br>\
+                                                              <h2>' + json['secret'] + '</h2>' + '<br><button style="width:190px; height:50px;" id="train_new" class="button button1">Begin Training Facial Recognition</button>';
+
+            var train_button = document.getElementById("train_new");
+            train_button.addEventListener("click", train_handler);
         }
     });
 }
