@@ -1,5 +1,7 @@
 from Crypto.Cipher import AES
+from tempfile import TemporaryFile
 import cv2, datetime, hashlib, json
+import numpy as np
 
 class Vault(object):
     SECRET_HEADER = "===========BEGIN SECRET==========="
@@ -10,6 +12,7 @@ class Vault(object):
     DATA_FOOTER = "============END DATA============"
     CHECKSUM = "FCHK" * 8
     IV = "1616161616161616"
+    DESIRED_LABEL = int(hashlib.md5("user").hexdigest(), 16) % (2 ** 31) # replace with data recieved from plugin?
     def __init__(self):
         self.filename = ""
         self.pin = ""
@@ -21,7 +24,12 @@ class Vault(object):
         self.encrypted_data = ""
         self.training = {}
         self.items = {}
-	self.recognizer = cv2.face.LBPHFaceRecognizer_create()
+        self.labels = np.array([])
+        self.images = []
+        try:
+            recognizer = cv2.face.createLBPHFaceRecognizer()
+        except:
+            self.recognizer = cv2.face.LBPHFaceRecognizer_create()
 
 
     def _pad(self, s, char='\x00', length=16):
@@ -117,13 +125,29 @@ class Vault(object):
 
         key = self._pad(self._make_key())
 
+        obj = AES.new(key, AES.MODE_CBC, pin)
+        tmp_training = obj.decrypt(self.encrypted_training)
+        if not tmp_training.startswith(Vault.CHECKSUM):
+            return False
+        tmp_training = tmp_training[len(Vault.CHECKSUM):].rstrip('\x00')
+        self.training = json.loads(tmp_training)
+
+        try:
+            outfile = TemporaryFile()
+            outfile.write(self.training['images'].decode('base64'))
+            outfile.seek(0)
+            self.images = np.load(outfile)
+        except:
+            print "Failed to load saved numpy array"
+
+        try:
+            outfile = TemporaryFile()
+            outfile.write(self.training['labels'].decode('base64'))
+            outfile.seek(0)
+            self.labels = np.load(outfile)
+        except:
+            print "Failed to load saved numpy array"
         if self.first:
-            obj = AES.new(key, AES.MODE_CBC, pin)
-            tmp_training = obj.decrypt(self.encrypted_training)
-            if not tmp_training.startswith(Vault.CHECKSUM):
-                return False
-            tmp_training = tmp_training[len(Vault.CHECKSUM):].rstrip('\x00')
-            self.training = json.loads(tmp_training)
             self.train()
 
 
@@ -173,6 +197,73 @@ class Vault(object):
         with open(self.filename, 'w') as w:
             w.write(self._serialize())
 
+    def extract_face(self, gs, face_cascade):
+            faces = face_cascade.detectMultiScale(gs, minSize=(75,75))
+            for (x, y, w, h) in faces:
+                    #cv2.rectangle(gs, (x,y),(x+w,y+h), (255, 0, 0), 2)
+                    #cv2.imshow("Added face", gs)
+                    return gs[y: y + h, x: x + w]
+
+    def detect(self, threshold=20, confidence_threshold = 50):
+        video_capture = cv2.VideoCapture(0)
+        face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+
+
+        for i in range(threshold):
+            ret, frame = video_capture.read()
+            gs = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+            found_face = self.extract_face(gs, face_cascade)
+            try:
+                nbr_predicted, conf = self.recognizer.predict(found_face)
+            except Exception:
+                print Exception
+                print "Probably couldn't find a face"
+                continue
+            print "Label: ", nbr_predicted
+            print "Confidence: ", conf
+            if conf < confidence_threshold:
+                return True
+
+        return False
+
+
+    def train(self):
+        self.recognizer.train(self.images, self.labels)
+
+    def collect_faces(self, threshold=20):
+            video_capture = cv2.VideoCapture(0)
+            old_len = len(self.images)
+            face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
+            new_adds = 0
+            while new_adds < threshold:
+                    ret, frame = video_capture.read()
+                    #cv2.imshow("Added face", frame)
+                    gs = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    found_face = self.extract_face(gs, face_cascade)
+                    if  isinstance(found_face, type(None)) or not found_face.all():
+                        continue
+                    self.images.append(found_face)
+                    new_adds += 1
+                    #cv2.imshow("Added face", images[-1])
+                    #cv2.waitKey(threshold)
+            #label is an identifier for an individual face
+            print "Found " + str(len(self.images)) + " faces"
+            tmp = self.labels
+            if len(self.labels) == 0:
+                    self.labels = np.asarray([Vault.DESIRED_LABEL for i in range(len(self.images)-old_len)], dtype="int")
+            else:
+                    self.labels = np.asarray(tmp, np.array([Vault.DESIRED_LABEL for i in range(len(self.images)-old_len)]), dtype="int")
+
+            outfile = TemporaryFile()
+            np.save(outfile, self.images)
+            outfile.seek(0)
+            self.training['images'] = outfile.read().encode('base64')
+
+            outfile = TemporaryFile()
+            np.save(outfile, self.labels)
+            outfile.seek(0)
+            self.training['labels'] = outfile.read().encode('base64')
+
 def main():
     v = Vault()
     v.filename = "test.fcvault"
@@ -195,6 +286,15 @@ def main():
     print "Using test training set: {}".format(test_training)
     print "Using test data set: {}".format(test_data)
 
+    v.collect_faces()
+    v.train()
+    print v.images
+    print v.labels
+    print v.training
+    print v.detect()
+    tmp_img = v.images
+    tmp_lbl = v.labels
+
     print "Trying file save to {}".format(v.filename)
     v.save()
 
@@ -205,8 +305,10 @@ def main():
     print v.load()
     print v.unlock()
     print v.secret == secret
+    print tmp_img == v.images
+    print tmp_lbl == v.labels
+    print v.detect()
     print "Loaded secret: {}".format(v.secret)
-    print "Loaded training set: {}".format(v.training)
     print "Loaded data set: {}".format(v.items)
 
 if __name__ == '__main__':

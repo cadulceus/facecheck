@@ -31,7 +31,7 @@ def detect(recognizer):
 def train(recognizer, images, labels):
 	recognizer.train(images, labels)
 
-def collect_faces(images, labels, inp_count, recognizer, desired_label):
+def collect_faces(images, labels, inp_count, desired_label):
 	video_capture = cv2.VideoCapture(0)
 	old_len = len(images)
 	face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")

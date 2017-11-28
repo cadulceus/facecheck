@@ -38,6 +38,22 @@ def copy_password():
     pyperclip.copy(password)
     return j({'status': 'success'})
 
+@app.route("/train")
+def train():
+    v.collect_faces()
+    v.train()
+    return j({'status': 'success'})
+
+@app.route("/detect")
+def detect():
+    success = v.detect()
+    return {'status': 'success' if success else 'error'}
+
+@app.route("/detect")
+def detect():
+    success = v.detect()
+    return {'status': 'success' if success else 'error'}
+
 @app.route("/edit_item", methods=["POST"])
 def edit_item():
     if not request.json or 'service' not in request.json or 'id' not in request.json:
@@ -190,6 +206,8 @@ def clear_training():
                   'message': 'vault must be unlocked to clear facial data'})
 
     v.training = {}
+    v.images = []
+    v.labels = np.array([])
     v.encrypted_training = ""
 
     if v.filename:
