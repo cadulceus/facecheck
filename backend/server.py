@@ -17,10 +17,10 @@ def sync():
         return jsonify({'status': 'success'})
 
     else:
-        if not request.params or 'id' not in request.params:
+        if not request.args or 'id' not in request.args:
             return jsonify({'status': 'error'})
         
-        _id = request.params['id']
+        _id = request.args['id']
         vault = db.get_vault(_id)
         if not vault:
             return jsonify({'status': 'error'})

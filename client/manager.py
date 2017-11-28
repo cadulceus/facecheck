@@ -66,20 +66,21 @@ class Vault(object):
         if sec_start == -1 or sec_end == -1:
             return False
         sec_start += len(Vault.SECRET_HEADER)
-        self.encrypted_secret = data[sec_start + 1:sec_end - 1]
 
         data_start = data.find(Vault.DATA_HEADER)
         data_end = data.find(Vault.DATA_FOOTER)
         if data_start == -1 or data_end == -1:
             return False
         data_start += len(Vault.DATA_HEADER)
-        self.encrypted_data = data[data_start + 1:data_end - 1]
 
         training_start = data.find(Vault.TRAINING_HEADER)
         training_end = data.find(Vault.TRAINING_FOOTER)
         if data_start == -1 or training_end == -1:
             return False
         training_start += len(Vault.TRAINING_HEADER)
+
+        self.encrypted_secret = data[sec_start + 1:sec_end - 1]
+        self.encrypted_data = data[data_start + 1:data_end - 1]
         self.encrypted_training = data[training_start + 1:training_end - 1]
 
         return True
