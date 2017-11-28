@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       });
       tabQuery(function(url){
-	      query = url;
+      query = url;
       console.log(query);
 
       var data = {"username":"steve","service":query,"password":password,"entry_name":"asdfasdf"}
@@ -104,7 +104,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
   var copy_pass = document.getElementById('copy_pass');
   copy_pass.addEventListener('click', function() {
-  	sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
+        tabQuery(function(url){
+        query = url;
+  	sendRequest('http://localhost:5000/copy_pass?service='+url, function (response) {
       //alert('My request returned this: ' + response);
       
       sendRequest('http://localhost:5000/detect', function (response) {
@@ -129,6 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("status_msg").style.backgroundColor = "#64DD17";
+    });
   });
 
 
