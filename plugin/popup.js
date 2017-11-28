@@ -52,10 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var password = json['password'];
       document.getElementById("status_msg").innerHTML = "Your Password:"+password;
 
-      sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
-      //alert('My request returned this: ' + response);
-
-      sendRequest('http://localhost:5000/detect', function (response) {
+      sendRequest('http://localhost:5000/unlock', function (response) {
       var json = JSON.parse(response);
       var stat = json['status'];
 
@@ -63,16 +60,25 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById("status_msg").innerHTML = stat;
 	return;
       }
-      });
+      }); 
+
+
+      var data = {"username":"steve","service":window.location.hostname,"password":password,"entry_name":"asdfasdf"}
+      sendRequestPost('http://localhost:5000/add_item',data,function (response) {
 
       var json = JSON.parse(response);
       var stat = json['status'];
 
-      if(stat == "error"){
         document.getElementById("status_msg").innerHTML = stat;
-      }else{
-        document.getElementById("status_msg").innerHTML = "Your password is copied to the clipboard :)";
-      }
+      }); 
+
+      sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
+      //alert('My request returned this: ' + response);
+
+      var json = JSON.parse(response);
+      var stat = json['status'];
+
+        document.getElementById("status_msg").innerHTML = stat;
 
       });
     
