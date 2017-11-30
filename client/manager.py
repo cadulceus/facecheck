@@ -193,7 +193,7 @@ class Vault(object):
             return False
         
         self.items[service][0]['password'] = password
-        return modified
+        return True
     
     def save(self):
         with open(self.filename, 'w') as w:
@@ -206,7 +206,7 @@ class Vault(object):
                     #cv2.imshow("Added face", gs)
                     return gs[y: y + h, x: x + w]
 
-    def detect(self, threshold=20, confidence_threshold = 50):
+    def detect(self, threshold=25, confidence_threshold = 15.5):
         video_capture = cv2.VideoCapture(0)
         face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
 
@@ -228,12 +228,13 @@ class Vault(object):
         return False
 
     def train(self):
+        print self.labels.dtype
         self.recognizer.train(self.images, self.labels)
         key = self._pad(self._make_key())
         obj = AES.new(key, AES.MODE_CBC, self._pad(self.pin))
         self.encrypted_training = obj.encrypt(self._pad(Vault.CHECKSUM + json.dumps(self.training)))
 
-    def collect_faces(self, threshold=20):
+    def collect_faces(self, threshold=200):
             video_capture = cv2.VideoCapture(0)
             old_len = len(self.images)
             face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
@@ -251,13 +252,11 @@ class Vault(object):
                     #cv2.waitKey(threshold)
             #label is an identifier for an individual face
             print "Found " + str(len(self.images)) + " faces"
-            for face in self.images:
-                print len(face)
             tmp = self.labels
             if len(self.labels) == 0:
                     self.labels = np.asarray([Vault.DESIRED_LABEL for i in range(len(self.images)-old_len)], dtype="int")
             else:
-                    self.labels = np.asarray(tmp, np.array([Vault.DESIRED_LABEL for i in range(len(self.images)-old_len)]), dtype="int")
+                    self.labels = np.asarray(np.append(tmp, np.array([Vault.DESIRED_LABEL for i in range(len(self.images)-old_len)])), dtype="int")
 
             outfile = TemporaryFile()
             np.save(outfile, self.images)

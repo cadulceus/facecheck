@@ -85,33 +85,32 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById("status_msg").style.backgroundColor = "#64DD17";
   });
 
-sendRequest('http://localhost:5000/detect', function (response) {
-      var json = JSON.parse(response);
-      var stat = json['status'];
-
-      if(stat == "error"){
-        document.getElementById("status_msg").innerHTML = stat;
-  return;
-      }
-      });
 
   var copy_pass = document.getElementById('copy_pass');
   copy_pass.addEventListener('click', function() {
-  	sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
-      //alert('My request returned this: ' + response);
-      
+    sendRequest('http://localhost:5000/detect', function (response) {
+    var json = JSON.parse(response);
+    var stat = json['status'];
+    if(stat == "Facial recognition failed"){
+      document.getElementById("status_msg").style.display = "block";
+      document.getElementById("status_msg").innerHTML = stat;
+      document.getElementById("status_msg").style.backgroundColor = "#F44336";
+      return;
+    }
+    sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
       var json = JSON.parse(response);
       var stat = json['status'];
 
-    	if(stat == "error"){
-        document.getElementById("status_msg").innerHTML = stat;
-        document.getElementById("status_msg").style.backgroundColor = "#F44336";
-    	}else{
-        document.getElementById("status_msg").innerHTML = "Password copied to clipboard";
-    	}
-    });
-    document.getElementById("status_msg").style.display = "block";
-    document.getElementById("status_msg").style.backgroundColor = "#64DD17";
+        if(stat == "error"){
+          document.getElementById("status_msg").innerHTML = stat;
+          document.getElementById("status_msg").style.backgroundColor = "#F44336";
+         }else{
+           document.getElementById("status_msg").style.display = "block";
+           document.getElementById("status_msg").style.backgroundColor = "#64DD17";
+           document.getElementById("status_msg").innerHTML = "Password copied to clipboard";
+         }
+   });
+  });
   });
 
 
@@ -121,66 +120,68 @@ sendRequest('http://localhost:5000/detect', function (response) {
       sendRequest('http://localhost:5000/detect', function (response) {
       var json = JSON.parse(response);
       var stat = json['status'];
+    document.getElementById("status_msg").style.display = "block";
+    document.getElementById("status_msg").innerHTML = "additional training successful!";
+    document.getElementById("status_msg").style.backgroundColor = "#F44336";
 
-      if(stat == 'error'){
-        document.getElementById("status_msg").innerHTML = stat;
-	return;
+    if(stat == "Facial recognition failed"){
+      document.getElementById("status_msg").style.display = "block";
+      document.getElementById("status_msg").innerHTML = stat;
+      document.getElementById("status_msg").style.backgroundColor = "#64DD17";
+      return;
+    }
+
+      sendRequest('http://localhost:5000/train', function (response) {
+      console.log(response);
+      var json = JSON.parse(response);
+      var stat = json['status'];
+      document.getElementById("status_msg").innerHTML = stat;
+      document.getElementById("status_msg").style.display = "block";
+      if(stat == "error") {
+        document.getElementById("status_msg").style.backgroundColor = "#F44336";
+        return; 
       }
       });
-
-     sendRequest('http://localhost:5000/train', function (response) {
-    
-     var json = JSON.parse(response);
-     var stat = json['status'];
-
-      document.getElementById("status_msg").innerHTML = stat;
-
     });
-
-    document.getElementById("status_msg").style.display = "block";
-    document.getElementById("passbox").style.display = "none";
-    document.getElementById("status_msg").style.backgroundColor = "#64DD17";
   });
 
 
   var wipe_user = document.getElementById('wipe_user');
   wipe_user.addEventListener('click', function() {
-     sendRequest('http://localhost:5000/clear_training', function (response) {
-      
-      sendRequest('http://localhost:5000/detect', function (response) {
+    sendRequest('http://localhost:5000/detect', function (response) {
       var json = JSON.parse(response);
       var stat = json['status'];
+        if(stat == "Facial recognition failed"){
+          document.getElementById("status_msg").style.display = "block";
+          document.getElementById("status_msg").innerHTML = stat;
+          document.getElementById("status_msg").style.backgroundColor = "#F44336";
+          return;
+        }
+        sendRequest('http://localhost:5000/clear_training', function (response) {
+          var json = JSON.parse(response);
+          var stat = json['status'];
 
-      if(stat == "error"){
-        document.getElementById("status_msg").innerHTML = stat;
-	return;
-      }
+          if(stat == "error"){
+             document.getElementById("status_msg").style.display = "block";
+             document.getElementById("status_msg").innerHTML = json['message'];
+             document.getElementById("status_msg").style.backgroundColor = "#F44336";
+          }else{
+             document.getElementById("status_msg").innerHTML = stat;
+             //train it again :)
+             sendRequest('http://localhost:5000/train', function (response) {
+          
+             var json = JSON.parse(response);
+             var stat = json['status'];
+
+             document.getElementById("status_msg").innerHTML = stat;
+             document.getElementById("status_msg").style.display = "block";
+             document.getElementById("status_msg").style.backgroundColor = "#64DD17";
+
+             });
+          }
+
+        });
       });
-
-
-     var json = JSON.parse(response);
-     var stat = json['status'];
-
-     if(stat == "error"){
-        document.getElementById("status_msg").innerHTML = json['message'];
-        document.getElementById("status_msg").style.backgroundColor = "#F44336";
-     }else{
-        document.getElementById("status_msg").innerHTML = stat;
-	//train it again :)
-    	sendRequest('http://localhost:5000/train', function (response) {
-     
-    	var json = JSON.parse(response);
-    	var stat = json['status'];
-
-    	document.getElementById("status_msg").innerHTML = stat;
-
-    	});
-     }
-
-    });
-      document.getElementById("status_msg").style.display = "block";
-      document.getElementById("passbox").style.display = "none";
-      document.getElementById("status_msg").style.backgroundColor = "#64DD17";
 
     
 
@@ -194,13 +195,19 @@ sendRequest('http://localhost:5000/detect', function (response) {
       var json = JSON.parse(response);
       var stat = json['status'];
 
-      if(stat == 'error'){
+      if(stat == "Facial recognition failed"){
+        document.getElementById("status_msg").style.display = "block";
         document.getElementById("status_msg").innerHTML = stat;
-	return;
+        document.getElementById("status_msg").style.backgroundColor = "#F44336";
+        return;
       }
+      document.getElementById("status_msg").innerHTML = "Modify and confirm:";
+      document.getElementById("status_msg").style.display = "block";
+      document.getElementById("passbox").style.display = "block";
+      document.getElementById("status_msg").style.backgroundColor = "#FFEB3B";
       });
     input.addEventListener('click', function() {
-	    var password = document.getElementById("password").value;
+      var password = document.getElementById("password").value;
       var service = window.location.hostname;
     	var id = "11111";
     	var json_data = {"service":service,"password":password,"id":id};	
@@ -210,16 +217,12 @@ sendRequest('http://localhost:5000/detect', function (response) {
               	document.getElementById("status_msg").innerHTML ='Something went wrong :(';
                 document.getElementById("status_msg").style.backgroundColor = "#F44336";
       	}else{
-              	document.getElementById("status_msg").innerHTML = json['message'];
+              	document.getElementById("status_msg").innerHTML = "Password successfully updated!";
                 document.getElementById("status_msg").style.backgroundColor = "#64DD17"   
       	}
 	    });
     });
 
-    document.getElementById("status_msg").innerHTML = "Modify and confirm:";
-    document.getElementById("status_msg").style.display = "block";
-    document.getElementById("passbox").style.display = "block";
-    document.getElementById("status_msg").style.backgroundColor = "#FFEB3B";
   });
 });
 
