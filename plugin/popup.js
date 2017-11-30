@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var stat = json['status'];
 
             if(stat == "error"){
-              document.getElementById("status_msg").innerHTML = stat;
+              document.getElementById("status_msg").innerHTML = stat + "rip";
               return;
             }
             var data = {"username":"steve","service":window.location.hostname,"password":password,"entry_name":"asdfasdf"}

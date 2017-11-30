@@ -246,7 +246,9 @@ def create():
     v.pin = request.args['pin'].strip()
     secret = gen_key()
     v.secret = secret
+    v.encrypted_secret = v.encrypt_secret(v.secret)
     v.unlocked = True
+    v.encrypted_data = v.encrypt_items({})
 
     h = hashlib.sha512()
     h.update(v.secret)

@@ -103,28 +103,35 @@ class Vault(object):
         
         return self._deserialize(data)
 
-
-    def train(self):
-        return
-
     def lock(self):
         self.secret = ""
         self.items = {}
         self.unlocked = False
 
+    def encrypt_secret(self, secret):
+        pin = self._pad(self.pin)
+        obj = AES.new(pin, AES.MODE_CBC, Vault.IV)
+        return obj.encrypt(self._pad(Vault.CHECKSUM + secret))
+
+    def encrypt_items(self, items):
+        pin = self._pad(self.pin)
+        key = self._pad(self._make_key())
+        obj = AES.new(key, AES.MODE_CBC, pin)
+        return obj.encrypt(self._pad(Vault.CHECKSUM + json.dumps(items)))
+
     def unlock(self):
         pin = self._pad(self.pin)
-
         if self.first or not self.secret:
             obj = AES.new(pin, AES.MODE_CBC, Vault.IV)
+            print self.encrypted_secret
             self.secret = obj.decrypt(self.encrypted_secret)
             if not self.secret.startswith(Vault.CHECKSUM):
+                print "is not send aids"
                 return False
             self.secret = self.secret[len(Vault.CHECKSUM):].rstrip('\x00')
 
 
         key = self._pad(self._make_key())
-
         obj = AES.new(key, AES.MODE_CBC, pin)
         tmp_training = obj.decrypt(self.encrypted_training)
         if not tmp_training.startswith(Vault.CHECKSUM):
@@ -139,6 +146,7 @@ class Vault(object):
             self.images = np.load(outfile)
         except:
             print "Failed to load saved numpy array"
+            return False
 
         try:
             outfile = TemporaryFile()
@@ -147,9 +155,9 @@ class Vault(object):
             self.labels = np.load(outfile)
         except:
             print "Failed to load saved numpy array"
+            return False
         if self.first:
             self.train()
-
 
         obj = AES.new(key, AES.MODE_CBC, pin)
         tmp_items = obj.decrypt(self.encrypted_data)
@@ -219,9 +227,11 @@ class Vault(object):
 
         return False
 
-
     def train(self):
         self.recognizer.train(self.images, self.labels)
+        key = self._pad(self._make_key())
+        obj = AES.new(key, AES.MODE_CBC, self._pad(self.pin))
+        self.encrypted_training = obj.encrypt(self._pad(Vault.CHECKSUM + json.dumps(self.training)))
 
     def collect_faces(self, threshold=20):
             video_capture = cv2.VideoCapture(0)
