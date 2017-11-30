@@ -184,9 +184,7 @@ class Vault(object):
         if not self.unlocked or service not in self.items:
             return False
         
-        modified = False
         self.items[service][0]['password'] = password
-
         return modified
     
     def save(self):
@@ -203,7 +201,6 @@ class Vault(object):
     def detect(self, threshold=20, confidence_threshold = 50):
         video_capture = cv2.VideoCapture(0)
         face_cascade = cv2.CascadeClassifier("haarcascade_frontalface_default.xml")
-
 
         for i in range(threshold):
             ret, frame = video_capture.read()

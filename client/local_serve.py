@@ -3,6 +3,8 @@ from manager import Vault
 from flask import Flask, request, jsonify
 from Tkinter import Tk
 
+import numpy as np
+
 app = Flask(__name__)
 BACKEND_ADDR = "localhost:5005"
 BACKEND = "http://{}".format(BACKEND_ADDR)
@@ -180,9 +182,46 @@ def get_sync():
     return j({'status': 'success'})
     
 @app.route("/import", methods=["POST"])
-def import():
-    if not 
+def vault_import():
+    global v
+    if not request.json or 'secret' not in request.json:
+        return j({'status': 'error',
+                  'message': 'missing pin argument'})
     
+    secret = request.json['secret'].strip()
+
+    h = hashlib.sha512()
+    h.update(secret)
+    vault_id = h.hexdigest()
+
+    try:
+        resp = requests.get(BACKEND + '/sync?id={}'.format(vault_id))
+    except:
+        return j({'status': 'error',
+                  'message': 'error contacting sync server'})
+
+    try:
+        data = resp.json()
+    except:
+        return j({'status': 'error',
+                  'message': 'error contacting sync server'})
+
+
+    if 'content' not in data:
+        return j({'status': 'error',
+                  'message': 'error contacting sync server'})
+
+    success = v._deserialize(data['content'].decode('base64'))
+    if not success:
+        return j({'status': 'error',
+                  'message': 'error deserializing vault contents'})
+
+    if v.filename:
+        with open(v.filename, 'w') as w:
+            w.write(data['content'].decode('base64'))
+
+    return j({'status': 'success'})
+
 
 @app.route("/set_pin")
 def set_pin():
@@ -209,8 +248,15 @@ def create():
     v.secret = secret
     v.unlocked = True
 
+    h = hashlib.sha512()
+    h.update(v.secret)
+    vault_id = h.hexdigest()
+
+    resp = requests.post(BACKEND + '/sync', json={'id': vault_id, 'content': v._serialize().encode('base64')})
+
     return j({'status': 'success',
               'pin': v.pin,
+              'sync': 'success' if resp.status_code == 200 else 'error',
               'secret': v.secret})
 
 @app.route('/clear_training')
