@@ -27,7 +27,7 @@ class Vault(object):
         self.labels = np.array([])
         self.images = []
         try:
-            recognizer = cv2.face.createLBPHFaceRecognizer()
+            self.recognizer = cv2.face.createLBPHFaceRecognizer()
         except:
             self.recognizer = cv2.face.LBPHFaceRecognizer_create()
 
@@ -241,6 +241,8 @@ class Vault(object):
                     #cv2.waitKey(threshold)
             #label is an identifier for an individual face
             print "Found " + str(len(self.images)) + " faces"
+            for face in self.images:
+                print len(face)
             tmp = self.labels
             if len(self.labels) == 0:
                     self.labels = np.asarray([Vault.DESIRED_LABEL for i in range(len(self.images)-old_len)], dtype="int")

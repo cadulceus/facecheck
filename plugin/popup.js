@@ -1,12 +1,3 @@
-function tabQuery(callback){
-	var url;
-        chrome.tabs.query({"active": true,"currentWindow":true}, function (tabs){
-        url = tabs[0].url;
-	return callback(url);
-        }
-	);
-}
-
 function sleep(milliseconds) {
   var start = new Date().getTime();
   for (var i = 0; i < 1e7; i++) {
@@ -44,81 +35,71 @@ document.addEventListener('DOMContentLoaded', function() {
   gen_pass.addEventListener('click', function() {
 
       sendRequest('http://localhost:5000/detect', function (response) {
-      var json = JSON.parse(response);
-      var stat = json['status'];
+        var json = JSON.parse(response);
+        var stat = json['status'];
 
-      if(stat == "error"){
         document.getElementById("status_msg").innerHTML = stat;
-	return;
-      }
+        
+        if(stat == "Facial recognition failed") {
+          document.getElementById("status_msg").style.backgroundColor = "#F44336";
+          return;
+        }
+        sendRequest('http://localhost:5000/gen_pass', function (response) {
+          //alert('My request returned this: ' + response);
+          //
+          var json = JSON.parse(response);
+          var password = json['password'];
+          document.getElementById("status_msg").innerHTML = "Your Password:"+password;
+
+          sendRequest('http://localhost:5000/unlock', function (response) {
+            var json = JSON.parse(response);
+            var stat = json['status'];
+
+            if(stat == "error"){
+              document.getElementById("status_msg").innerHTML = stat;
+              return;
+            }
+            var data = {"username":"steve","service":window.location.hostname,"password":password,"entry_name":"asdfasdf"}
+            sendRequestPost('http://localhost:5000/add_item',data,function (response) {
+              var json = JSON.parse(response);
+              var stat = json['status'];
+              document.getElementById("status_msg").innerHTML = stat;
+              sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
+                //alert('My request returned this: ' + response);
+
+                var json = JSON.parse(response);
+                var stat = json['status'];
+
+                document.getElementById("status_msg").innerHTML = stat;
+              });
+
+            }); 
+
+          }); 
+
       }); 
-
-
-    sendRequest('http://localhost:5000/gen_pass', function (response) {
-      //alert('My request returned this: ' + response);
-      //
-      var json = JSON.parse(response);
-      var password = json['password'];
-      document.getElementById("status_msg").innerHTML = "Your Password:"+password;
-
-      sendRequest('http://localhost:5000/unlock', function (response) {
-      var json = JSON.parse(response);
-      var stat = json['status'];
-
-      if(stat == "error"){
-        document.getElementById("status_msg").innerHTML = stat;
-	return;
-      }
-      });
-      tabQuery(function(url){
-      query = url;
-      console.log(query);
-
-      var data = {"username":"steve","service":query,"password":password,"entry_name":"asdfasdf"}
-      sendRequestPost('http://localhost:5000/add_item',data,function (response) {
-
-      var json = JSON.parse(response);
-      var stat = json['status'];
-
-        document.getElementById("status_msg").innerHTML = stat;
-      }); 
-	
-      sendRequest('http://localhost:5000/copy_pass?service='+query, function (response) {
-      //alert('My request returned this: ' + response);
-
-      var json = JSON.parse(response);
-      var stat = json['status'];
-
-        document.getElementById("status_msg").innerHTML = stat;
-
-      });
     
     });
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("passbox").style.display = "none";
     document.getElementById("status_msg").style.backgroundColor = "#64DD17";
-    });
-
   });
 
-
-  var copy_pass = document.getElementById('copy_pass');
-  copy_pass.addEventListener('click', function() {
-        tabQuery(function(url){
-        query = url;
-  	sendRequest('http://localhost:5000/copy_pass?service='+url, function (response) {
-      //alert('My request returned this: ' + response);
-      
-      sendRequest('http://localhost:5000/detect', function (response) {
+sendRequest('http://localhost:5000/detect', function (response) {
       var json = JSON.parse(response);
       var stat = json['status'];
 
       if(stat == "error"){
         document.getElementById("status_msg").innerHTML = stat;
-	return;
+  return;
       }
       });
 
+  var copy_pass = document.getElementById('copy_pass');
+  copy_pass.addEventListener('click', function() {
+  	sendRequest('http://localhost:5000/copy_pass?service='+window.location.hostname, function (response) {
+      //alert('My request returned this: ' + response);
+      
       var json = JSON.parse(response);
       var stat = json['status'];
 
@@ -131,7 +112,6 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     document.getElementById("status_msg").style.display = "block";
     document.getElementById("status_msg").style.backgroundColor = "#64DD17";
-    });
   });
 
 

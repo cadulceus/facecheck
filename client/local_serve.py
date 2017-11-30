@@ -32,7 +32,7 @@ def generate_password():
 def copy_password():
     global v
     if not request.args or 'service' not in request.args or not v.unlocked:
-        return j({'status': 'bad args'+str(v.unlocked)})
+        return j({'status': 'bad args'})
 
     service = request.args['service'].lower()
 
@@ -56,7 +56,7 @@ def train():
 def detect():
     global v
     success = v.detect()
-    return j({'status': 'success' if success else 'error'})
+    return j({'status': 'success' if success else 'Facial recognition failed'})
 
 @app.route("/edit_item", methods=["POST"])
 def edit_item():
